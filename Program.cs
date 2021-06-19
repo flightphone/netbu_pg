@@ -58,6 +58,7 @@ namespace netbu
 
 
             //Мапим диск
+            /*
             try
             {
                 System.Diagnostics.Process batch = new System.Diagnostics.Process();
@@ -66,7 +67,7 @@ namespace netbu
             }
             catch
             {; }
-
+            */
             //Кодировки
             //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 

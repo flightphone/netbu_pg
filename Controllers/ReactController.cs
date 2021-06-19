@@ -205,7 +205,7 @@ namespace netbu.Controllers
                 r = '\t';
             string s = F.ExportCSV(r);
             string ctype = "application/octet-stream";
-            byte[] buf = Encoding.GetEncoding(1251).GetBytes(s);
+            byte[] buf = Encoding.UTF8.GetBytes(s);
             string filename = $"data_{id}.{format}";
             if (!string.IsNullOrEmpty(dateformat))
                 filename = pref + DateTime.Now.ToString(dateformat) + "." + format;

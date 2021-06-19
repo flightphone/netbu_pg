@@ -10,6 +10,7 @@ using System.Text;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Drawing;
+using Npgsql;
 
 namespace netbu.Models
 {
@@ -937,27 +938,30 @@ namespace netbu.Models
             return res;
         }
 
-
+        public bool checkAccess(string account, string password)
+        {
+            var cnstr = Program.isPostgres ? Program.AppConfig["cns"] : Program.AppConfig["mscns"];
+            var sqlcheck = "select username from t_ntusers where username = @account and pass = @password";
+            var res = new DataTable();
+            if (Program.isPostgres)
+            {
+                var da = new NpgsqlDataAdapter(sqlcheck, cnstr);
+                da.SelectCommand.Parameters.AddWithValue("@account", account);
+                da.SelectCommand.Parameters.AddWithValue("@password", password);
+                da.Fill(res);
+            }
+            else
+            {
+                var da = new SqlDataAdapter(sqlcheck, cnstr);
+                da.SelectCommand.Parameters.AddWithValue("@account", account);
+                da.SelectCommand.Parameters.AddWithValue("@password", password);
+                da.Fill(res);
+            }
+            return (res.Rows.Count > 0);
+        }
         public bool CheckLogon(string UserName, string Password)
         {
-            bool r = false;
-            SqlConnection cn = new SqlConnection(DBClient.CnStr);
-            SqlCommand Ex = new SqlCommand("p_sysCheckLogon", cn);
-            Ex.CommandType = CommandType.StoredProcedure;
-            Ex.Parameters.AddWithValue("@UserName", UserName);
-            Ex.Parameters.AddWithValue("@Pass", Password);
-            try
-            {
-                cn.Open();
-                int res = (int)Ex.ExecuteScalar();
-                cn.Close();
-                r = (res == 1);
-            }
-            catch
-            {
-                r = false;
-            }
-            return r;
+            return checkAccess(UserName, Password);
         }
         
     }

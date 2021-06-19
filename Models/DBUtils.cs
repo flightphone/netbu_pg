@@ -7,102 +7,18 @@ using netbu;
 using Newtonsoft.Json;
 using System.Net;
 using System.IO;
-using suggestionscsharp;
+
 
 namespace netbu.Models
 {
 
     class dadataINN
     {
-        public string sendtele(string channelID, string UserToken, string content)
-        {
-            string responseText = "";
-            try
-            {
-                string teleurl = "http://services.utg.group/telegram/api/Channel/publish";
-                //string teleurl = "http://195.209.129.21/telegram/api/Channel/publish";
-                var httpRequest = (HttpWebRequest)WebRequest.Create(teleurl);
-                httpRequest.Method = "POST";
-                httpRequest.ContentType = "application/json";
-                httpRequest.Headers.Add("UserToken", UserToken);
-                var serializer = new JsonSerializer();
-                using (var w = new StreamWriter(httpRequest.GetRequestStream()))
-                {
-                    using (JsonWriter writer = new JsonTextWriter(w))
-                    {
-                        serializer.Serialize(writer, new { channelID = channelID, content = content });
-                    }
-                }
-
-                HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-                using (var r = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    responseText = r.ReadToEnd();
-                }
-            }
-            catch (Exception e)
-            {
-                responseText = e.Message;
-            }
-            return responseText;
-        }
-
-
-        public string getjson(string inn)
-        {
-            if (string.IsNullOrEmpty(inn))
-                return "";
-            inn = inn.Split('/')[0];
-
-            var httpRequest = (HttpWebRequest)WebRequest.Create(Program.AppConfig["dadataurl"]);
-            httpRequest.Method = "POST";
-            httpRequest.ContentType = "application/json";
-            httpRequest.Headers.Add("Authorization", "Token " + Program.AppConfig["dadatakey"]);
-            var serializer = new JsonSerializer();
-            using (var w = new StreamWriter(httpRequest.GetRequestStream()))
-            {
-                using (JsonWriter writer = new JsonTextWriter(w))
-                {
-                    serializer.Serialize(writer, new { query = inn });
-                }
-            }
-            string responseText = "";
-            HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            using (var r = new StreamReader(httpResponse.GetResponseStream()))
-            {
-                responseText = r.ReadToEnd();
-            }
-            return responseText;
-        }
-
-        public PartyData exec(string inn)
-        {
-            string responseText = getjson(inn);
-            if (string.IsNullOrEmpty(responseText))
-                return null;
-            try
-            {
-                SuggestResponse suggs = JsonConvert.DeserializeObject<SuggestResponse>(responseText);
-                if (suggs.suggestions.Count == 0)
-                    return null;
-                else
-                    return suggs.suggestions[0].data;
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        
 
         public static int FileAccess(string Account, string dogid)
         {
-            String sql = "select dbo.fn_cntFileAccess(@Account, @dogid)";
-            SqlConnection cn = new SqlConnection(Program.AppConfig["mscns"]);
-            SqlCommand cmd = new SqlCommand(sql, cn);
-            cn.Open();
-            cmd.Parameters.AddWithValue("@Account", Account);
-            cmd.Parameters.AddWithValue("@dogid", dogid);
-            int r = (int)cmd.ExecuteScalar();
+            int r = 15;
             return r;
 
         }
@@ -139,27 +55,7 @@ namespace netbu.Models
     public class treeutil
     {
 
-        public bool checkAccess(string account, string password)
-        {
-            var cnstr = Program.isPostgres ? Program.AppConfig["cns"] : Program.AppConfig["mscns"];
-            var sqlcheck = "select username from t_ntusers where username = @account and pass = @password";
-            var res = new DataTable();
-            if (Program.isPostgres)
-            {
-                var da = new NpgsqlDataAdapter(sqlcheck, cnstr);
-                da.SelectCommand.Parameters.AddWithValue("@account", account);
-                da.SelectCommand.Parameters.AddWithValue("@password", password);
-                da.Fill(res);
-            }
-            else
-            {
-                var da = new SqlDataAdapter(sqlcheck, cnstr);
-                da.SelectCommand.Parameters.AddWithValue("@account", account);
-                da.SelectCommand.Parameters.AddWithValue("@password", password);
-                da.Fill(res);
-            }
-            return (res.Rows.Count > 0);
-        }
+        
         public void CreateItems(string Root, treeItem Mn, DataTable Tab)
         {
 

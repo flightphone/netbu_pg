@@ -183,14 +183,7 @@ namespace netbu.Controllers
                 //лог 19.02.2020
                 try
                 {
-                    String sql = "p_cntfilehistory_add";
-                    SqlDataAdapter da = new SqlDataAdapter(sql, Program.AppConfig["mscns"]);
-                    da.SelectCommand.CommandType = CommandType.StoredProcedure;
-                    da.SelectCommand.Parameters.AddWithValue("@fh_filename", path);
-                    da.SelectCommand.Parameters.AddWithValue("@fh_account", User.Identity.Name);
-                    da.SelectCommand.Parameters.AddWithValue("@fh_action", "delete");
-                    DataTable head = new DataTable();
-                    da.Fill(head);
+                    
                 }
                 catch
                 {; }
@@ -253,14 +246,7 @@ namespace netbu.Controllers
                         //лог 19.02.2020
                         try
                         {
-                            String sql = "p_cntfilehistory_add";
-                            SqlDataAdapter da = new SqlDataAdapter(sql, Program.AppConfig["mscns"]);
-                            da.SelectCommand.CommandType = CommandType.StoredProcedure;
-                            da.SelectCommand.Parameters.AddWithValue("@fh_filename", path + img.FileName);
-                            da.SelectCommand.Parameters.AddWithValue("@fh_account", User.Identity.Name);
-                            da.SelectCommand.Parameters.AddWithValue("@fh_action", "add");
-                            DataTable head = new DataTable();
-                            da.Fill(head);
+                            
                         }
                         catch
                         {; }
@@ -283,69 +269,7 @@ namespace netbu.Controllers
 
         }
 
-        public IActionResult getphoto(string audtuser)
-        {
-            string sql = "select  top 1 image_bmp from dbo.cntEmployees (nolock) where AD_Name = @audtuser and isnull(image_bmp, '') <> ''";
-            SqlDataAdapter da = new SqlDataAdapter(sql, Program.AppConfig["mscns"]);
-            da.SelectCommand.Parameters.AddWithValue("@audtuser", audtuser);
-            DataTable foto = new DataTable();
-            da.Fill(foto);
-            string ctype = "image/jpeg";
-            byte[] buf = { };
-            if (foto.Rows.Count > 0)
-            {
-                buf = Convert.FromBase64String(foto.Rows[0][0].ToString());
-            }
-            else
-            {
-                buf = System.IO.File.ReadAllBytes(@"wwwroot\Image\avatar_blank.jpg");
-            }
-            return File(buf, ctype);
-
-        }
-        public IActionResult comments(int ag_id, string ag_type, string cm_status, string cm_message)
-        {
-           try
-           {     
-            if (!string.IsNullOrEmpty(cm_message))
-            {
-                SqlDataAdapter de = new SqlDataAdapter("p_cntcomments_EDIT", Program.AppConfig["mscns"]);
-                de.SelectCommand.CommandType = CommandType.StoredProcedure;
-                de.SelectCommand.Parameters.AddWithValue("@cm_id", -1);
-                de.SelectCommand.Parameters.AddWithValue("@ag_id", ag_id);
-                de.SelectCommand.Parameters.AddWithValue("@ag_type", ag_type);
-                de.SelectCommand.Parameters.AddWithValue("@cm_status", cm_status);
-                de.SelectCommand.Parameters.AddWithValue("@cm_message", cm_message);
-                de.SelectCommand.Parameters.AddWithValue("@audtuser", User.Identity.Name);
-                de.SelectCommand.Parameters.AddWithValue("@audtdate", DateTime.Now);
-                DataTable res = new DataTable();
-                de.Fill(res);
-            }
-
-
-            String sql = "p_cntcomments_view";
-            SqlDataAdapter da = new SqlDataAdapter(sql, Program.AppConfig["mscns"]);
-            da.SelectCommand.CommandType = CommandType.StoredProcedure;
-            da.SelectCommand.Parameters.AddWithValue("@ag_id", ag_id);
-            da.SelectCommand.Parameters.AddWithValue("@ag_type", ag_type);
-            DataTable head = new DataTable();
-            DataTable comments = new DataTable();
-            da.Fill(0, 0, new DataTable[] { head, comments });
-
-            ViewBag.info = head.Rows[0][0];
-            ViewBag.rows = comments.Rows;
-            ViewBag.ag_id = ag_id;
-            ViewBag.ag_type = ag_type;
-            ViewBag.user = User.Identity.Name;
-
-            return View();
-           }
-           catch (Exception ex)
-           {
-               return Content(ex.Message);
-           }
-        }
-
+        
         public IActionResult dir(string id, string id64, string caption)
         {
             if (string.IsNullOrEmpty(caption))
@@ -385,9 +309,7 @@ namespace netbu.Controllers
                 //DirectoryInfo[] dirs = di.GetDirectories();
                 //FileInfo[] files = di.GetFiles();
                 //Доступ
-                int fileacc = dadataINN.FileAccess(
-				string.IsNullOrEmpty(User.Identity.Name)?"manevich":User.Identity.Name
-								, paths[0]);
+                int fileacc = 15;
                 ViewBag.fileacc = fileacc;
 
                 string pagetitle = id;
