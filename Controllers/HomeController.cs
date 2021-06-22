@@ -18,7 +18,7 @@ namespace netbu.Controllers
     public class HomeController : Controller
     {
 
-        [Authorize]
+        //[Authorize]
         public ActionResult Index(string id)
         {
             ViewBag.id = id;
@@ -36,7 +36,7 @@ namespace netbu.Controllers
                 
                 string account = User.Identity.Name;
                 if (string.IsNullOrEmpty(account))
-                    account = "malkin";
+                    account = "Admin";
                 var tu = new treeutil();
 
                 var data = new DataTable();

@@ -135,6 +135,8 @@ namespace WpfBu.Models
 
         public int nrows { get; set; }
 
+        public string not_page { get; set; }
+
         private int _page = 1;
         public int page
         {
@@ -200,6 +202,11 @@ namespace WpfBu.Models
             if (nrows == 0)
                 nrows = 30;
             pagination = (nrows >= 30);
+
+            if (!string.IsNullOrEmpty(not_page))
+            {
+                pagination = false;
+            }
 
             if (DefaultValues == null)
                 DefaultValues = new Dictionary<string, object>();

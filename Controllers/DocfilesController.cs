@@ -28,60 +28,8 @@ namespace netbu.Controllers
             _env = env;
         }    
 
-        [AllowAnonymous]
-        public IActionResult fcheck()
-        {
-            filecheckAsync();
-            return Content("Process started");
-        }
-        private async void filecheckAsync()
-        {
-            await Task.Run(() => filecheck());
-        }
-        private void filecheck()
-        {
-            try
-            {
-                string sqlu = "update cntfilehistory set fh_vol = @fh_vol where fh_pk = @fh_pk";
-                SqlConnection cn = new SqlConnection(Program.AppConfig["mscns"]);
-                SqlCommand cmd = new SqlCommand(sqlu, cn);
-                string sql = "select fh_pk,  fh_filename from cntfilehistory(nolock) where fh_vol is null";
-                SqlDataAdapter da = new SqlDataAdapter(sql, Program.AppConfig["mscns"]);
-                DataTable res = new DataTable();
-                da.Fill(res);
-
-                cn.Open();
-                foreach (DataRow rw in res.Rows)
-                {
-                    try
-                    {
-                        var filename = rw["fh_filename"].ToString();
-                        var fi = new FileInfo(filename);
-                        cmd.Parameters.Clear();
-                        cmd.Parameters.AddWithValue("@fh_vol", fi.Length);
-                        cmd.Parameters.AddWithValue("@fh_pk", rw["fh_pk"]);
-                        cmd.ExecuteNonQuery();
-                    }
-                    catch {; }
-                }
-                cn.Close();
-            }
-            catch {; }
-        }
-
-        [AllowAnonymous]
-        public ActionResult photo(string id)
-        {
-            string path = Program.AppConfig["photofiles"] + @"\" + id;
-            string ctype = "image/jpeg";
-            if (System.IO.File.Exists(path))
-            {
-                byte[] buf = System.IO.File.ReadAllBytes(path);
-                return File(buf, ctype);
-            }
-            else
-                return NotFound();
-        }
+        
+        
         public IActionResult errorlog()
         {
             var webRoot = _env.WebRootPath;
@@ -115,7 +63,7 @@ namespace netbu.Controllers
                     ctype = "application/pdf";
                 */
                 //async log 17/10/2020
-                filelogAsync(path, "get");
+                //filelogAsync(path, "get");
 
                 if (ext == "gif" || ext == "bmp" || ext == "jpg" || ext == "jpeg" || ext == "png")
                     ctype = "image/jpeg";
@@ -143,31 +91,8 @@ namespace netbu.Controllers
 
         }
 
-        //async log 17/10/2020
-        private async void filelogAsync(string path, string action)
-        {
-            await Task.Run(() => filelog(path, action));
-        }
 
-        private void filelog(string path, string action)
-        {
-            //лог 18.12.2019
-            try
-            {
-                String sql = "p_cntfilehistory_add";
-                SqlDataAdapter da = new SqlDataAdapter(sql, Program.AppConfig["mscns"]);
-                da.SelectCommand.CommandType = CommandType.StoredProcedure;
-                da.SelectCommand.Parameters.AddWithValue("@fh_filename", path);
-                da.SelectCommand.Parameters.AddWithValue("@fh_account", User.Identity.Name);
-                da.SelectCommand.Parameters.AddWithValue("@fh_action", action);  //19/02/2020
-                DataTable head = new DataTable();
-                da.Fill(head);
-            }
-            catch
-            {; }
-            //лог 18.12.2019
-
-        }
+        
         public JsonResult delete_file(string id, string mode)
         {
             id = WebUtility.HtmlDecode(id);

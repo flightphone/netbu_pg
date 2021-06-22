@@ -103,7 +103,7 @@ namespace netbu.Controllers
             var F = new Finder();
             F.Account = User.Identity.Name;
             if (string.IsNullOrEmpty(F.Account))
-                F.Account = "malkin";
+                F.Account = "Admin";
 
             F.nrows = 30;
             if (!string.IsNullOrEmpty(mode))
