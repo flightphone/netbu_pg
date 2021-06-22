@@ -18,9 +18,12 @@ using System.Text.RegularExpressions;
 using WpfBu.Models;
 
 
+
 namespace netbu.Controllers
 {
 
+
+    [Authorize]
     public class FileLoadController : Controller
     {
         private IHostingEnvironment _env;
@@ -112,10 +115,20 @@ namespace netbu.Controllers
             string q1 = @"""";
             string q2 = @"""""";
 
-            
+
             string[] rows = csvSplit(csv, "\n", false);
             string cols = rows[0].Trim().ToLower();
             string[] cols_list = cols.Split(";", StringSplitOptions.None);
+
+            int nid = Array.IndexOf(cols_list, "nn");
+            if (nid == -1)
+                return Content("Не указана колонка nn.");
+
+            string[] vals1 = csvSplit(rows[1], ";", true);
+            if (vals1[nid] != nn)
+                return Content("В колонке nn указано значение отличное от nn записи о загрузке тарифа.");
+
+
             string sql = "select fn_findtable(@cols)";
             var da = new NpgsqlDataAdapter(sql, MainObj.ConnectionString);
             da.SelectCommand.Parameters.AddWithValue("@cols", cols);
@@ -195,6 +208,139 @@ namespace netbu.Controllers
 
         }
 
+        public IActionResult tariffs(string nn)
+        {
 
+
+            string InsertCreate(string txt, string TableName)
+            {
+
+                string fieldValue(string vl, string cname, List<string> nobj)
+                {
+                    if (string.IsNullOrEmpty(vl))
+                        return "null";
+
+                    vl = vl.Replace("'", "''");
+                    if (nobj.Contains(cname))
+                        vl = vl.Replace(',', '.');
+
+                    vl = "'" + vl + "'";    
+                    return vl;
+                }
+
+                List<string> numobj = new List<string>();
+                numobj.Add("tf_tariffmain");
+                numobj.Add("tf_payexec");
+                numobj.Add("tf_paymin");
+                
+
+                var da1 = new NpgsqlDataAdapter(txt, MainObj.ConnectionString);
+                DataTable rec = new DataTable();
+                da1.Fill(rec);
+
+                string res = "\r\n";
+                var insStr = "insert into " + TableName + "(";
+                insStr = insStr + rec.Columns[0].ColumnName;
+
+                for (var i = 1; i < rec.Columns.Count; i++)
+                {
+                    insStr = insStr + ',' + rec.Columns[i].ColumnName;
+                }
+                insStr = insStr + ")\r\n";
+
+                for (int i = 0; i < rec.Rows.Count; i++)
+                {
+                    string valStr = "values (";
+                    valStr = valStr + fieldValue(rec.Rows[i][rec.Columns[0].ColumnName].ToString(), rec.Columns[0].ColumnName, numobj);
+                    for (var j = 1; j < rec.Columns.Count; j++)
+                    {
+                        valStr = valStr + ',' + fieldValue(rec.Rows[i][rec.Columns[j].ColumnName].ToString(), rec.Columns[j].ColumnName, numobj);
+                    }
+                    valStr = valStr + ");\r\n";
+                    res = res + insStr + valStr;
+                }
+                return res;
+            }
+
+
+            if (string.IsNullOrEmpty(nn))
+                nn = "-1";
+            string sql = "select * from v_Tariffs_ext_import where nn = " + nn + " /*[Tariffs_ext_import]*/";
+            if (nn == "-1")
+                sql = "select * from v_Tariffs_ext_import_group /*[Tariffs_ext_import]*/";
+            var resSQL = "use uFlights\r\ngo\r\n";
+            resSQL = resSQL + "truncate table Tariffs_ext_import;\r\n";
+            resSQL = resSQL + "\r\n----------------------------------------------------\r\n";
+            resSQL = resSQL + InsertCreate(sql, "Tariffs_ext_import"); 
+
+            resSQL = resSQL + "\r\n----------------------------------------------------\r\n";
+            resSQL = resSQL + "\r\ndeclare @date datetime, @al uniqueidentifier, @n int, @AP_IATA varchar(3);\r\n";
+
+            var sqlproc = "select * from v_tariffs_ext_load where (is_run = 1 and " + nn + " = -1) or nn = " + nn + ";";
+            var da = new NpgsqlDataAdapter(sqlproc, MainObj.ConnectionString);
+
+            DataTable recheck = new DataTable();
+            da.Fill(recheck);
+
+            string filename = $"dump_{nn}.sql";
+            for (int i = 0; i < recheck.Rows.Count; i++)
+            {
+                DataRow mi = recheck.Rows[i];
+                filename = $"dump_{mi["al_utg"].ToString()}{((DateTime)mi["tf_datebeg"]).ToString("yyyyMMdd")}.sql";
+
+                if (mi["tf_comment"] == DBNull.Value)
+                    mi["tf_comment"] = "";
+                resSQL = resSQL + "\r\n-----" + mi["al_nameru"].ToString() + "\r\n";
+                resSQL = resSQL + "set @date = '" + ((DateTime)mi["tf_datebeg"]).ToString("yyyy-MM-dd") + "';\r\n";
+                resSQL = resSQL + "set @n = " + mi["nn"].ToString() + ";\r\n";
+                resSQL = resSQL + "set @al = '" + mi["tf_al"].ToString() + "';\r\n";
+                if (mi["ap_iata"].ToString() == "DME")
+                    resSQL = resSQL + "set @AP_IATA = 'DME'\r\n";
+                else
+                    resSQL = resSQL + "set @AP_IATA = 'VKO'\r\n";
+
+
+                resSQL = resSQL + "--exec p_Tariffs_Ext_exists @al, 'VKO', @date, 0 --,'111,8,790' --добавляет по списку услуг;\r\n";
+
+
+                resSQL = resSQL + "exec uFlights..p_Tariffs_ext_load\r\n";
+                resSQL = resSQL + "@NN = @n,\r\n";
+                resSQL = resSQL + "@TF_AL =@al,\r\n";
+                resSQL = resSQL + "@TF_DateBeg = @date,\r\n";
+                resSQL = resSQL + "@TF_Agent = '" + mi["tf_agent"].ToString() + "',\r\n";
+                resSQL = resSQL + "@TF_Currency = '" + mi["tf_currency"].ToString() + "',\r\n";
+                resSQL = resSQL + "@TF_VAT_str = '" + mi["tf_vat_str"].ToString() + "',\r\n";
+                resSQL = resSQL + "@TF_Comment = '" + mi["tf_comment"].ToString() + "',\r\n";
+                resSQL = resSQL + "@AP_IATA = @AP_IATA,\r\n";
+
+                if (!string.IsNullOrEmpty(mi["tf_format"].ToString()))
+                    resSQL = resSQL + "@NOT_CL = 1";
+                else
+                    resSQL = resSQL + "@NOT_CL = 0";
+
+                resSQL = resSQL + ";\r\n\r\n";
+
+
+                resSQL = resSQL + "exec WorkOrders..p_syncTariff\r\n";
+                resSQL = resSQL + "@AL_PK = @al,\r\n";
+                resSQL = resSQL + "@VT_DateBeg = @date,\r\n";
+                resSQL = resSQL + "@AP_IATA = @AP_IATA;\r\n\r\n";
+
+
+                resSQL = resSQL + "exec WorkOrders..p_Orders_Culc\r\n";
+                resSQL = resSQL + "@AL_PK = @al,\r\n";
+                resSQL = resSQL + "@VT_DateBeg = @date,\r\n";
+                resSQL = resSQL + "@AP_IATA = @AP_IATA;\r\n\r\n";
+                resSQL = resSQL + "\r\n----------------------------------------------------\r\n";
+                resSQL = resSQL + "--exec p_Tariffs_Ext_compare @al, @n;\r\n";
+
+            }
+
+
+
+            string ctype = "application/octet-stream";
+            byte[] buf = Encoding.UTF8.GetBytes(resSQL);
+            return File(buf, ctype, filename);
+        }
     }
 }

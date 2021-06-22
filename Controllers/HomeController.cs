@@ -18,7 +18,7 @@ namespace netbu.Controllers
     public class HomeController : Controller
     {
 
-        //[Authorize]
+        [Authorize]
         public ActionResult Index(string id)
         {
             ViewBag.id = id;
@@ -28,7 +28,7 @@ namespace netbu.Controllers
 
         #region secret
         [Route("ustore/gettree")]
-        //[Authorize]
+        [Authorize]
         public JsonResult gettree()
         {
             try

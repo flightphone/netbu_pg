@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace netbu.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class ReactController : Controller
     {
         public JsonResult exec(string EditProc, string SQLParams, string KeyF)
