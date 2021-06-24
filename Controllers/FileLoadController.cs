@@ -121,13 +121,15 @@ namespace netbu.Controllers
             string[] cols_list = cols.Split(";", StringSplitOptions.None);
 
             int nid = Array.IndexOf(cols_list, "nn");
-            if (nid == -1)
-                return Content("Не указана колонка nn.");
-
+            
+            if (nid != -1)
+            {
+                //return Content("Не указана колонка nn.");
+            //Загрузка в любую таблицу    
             string[] vals1 = csvSplit(rows[1], ";", true);
             if (vals1[nid] != nn)
                 return Content("В колонке nn указано значение отличное от nn записи о загрузке тарифа.");
-
+            }
 
             string sql = "select fn_findtable(@cols)";
             var da = new NpgsqlDataAdapter(sql, MainObj.ConnectionString);
@@ -155,6 +157,12 @@ namespace netbu.Controllers
 
             string insstr = $"insert into {table_name}({cols.Replace(";", ", ")})";
             sql = $"delete from tariffs_import where nn = {nn.ToString()};\n";
+            if (nid ==-1)
+            {
+                //Загрузка в любую таблицу
+                sql = "";
+            }
+
             for (var i = 1; i < rows.Length; i++)
             {
                 string[] vals = csvSplit(rows[i], ";", true);
