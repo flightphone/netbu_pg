@@ -121,14 +121,14 @@ namespace netbu.Controllers
             string[] cols_list = cols.Split(";", StringSplitOptions.None);
 
             int nid = Array.IndexOf(cols_list, "nn");
-            
+
             if (nid != -1)
             {
                 //return Content("Не указана колонка nn.");
-            //Загрузка в любую таблицу    
-            string[] vals1 = csvSplit(rows[1], ";", true);
-            if (vals1[nid] != nn)
-                return Content("В колонке nn указано значение отличное от nn записи о загрузке тарифа.");
+                //Загрузка в любую таблицу    
+                string[] vals1 = csvSplit(rows[1], ";", true);
+                if (vals1[nid] != nn)
+                    return Content("В колонке nn указано значение отличное от nn записи о загрузке тарифа.");
             }
 
             string sql = "select fn_findtable(@cols)";
@@ -157,7 +157,7 @@ namespace netbu.Controllers
 
             string insstr = $"insert into {table_name}({cols.Replace(";", ", ")})";
             sql = $"delete from tariffs_import where nn = {nn.ToString()};\n";
-            if (nid ==-1)
+            if (nid == -1)
             {
                 //Загрузка в любую таблицу
                 sql = "";
@@ -216,7 +216,7 @@ namespace netbu.Controllers
 
         }
 
-        public IActionResult tariffs(string nn)
+        public IActionResult tariffs(string nn, string mode)
         {
 
 
@@ -232,7 +232,7 @@ namespace netbu.Controllers
                     if (nobj.Contains(cname))
                         vl = vl.Replace(',', '.');
 
-                    vl = "'" + vl + "'";    
+                    vl = "'" + vl + "'";
                     return vl;
                 }
 
@@ -240,7 +240,7 @@ namespace netbu.Controllers
                 numobj.Add("tf_tariffmain");
                 numobj.Add("tf_payexec");
                 numobj.Add("tf_paymin");
-                
+
 
                 var da1 = new NpgsqlDataAdapter(txt, MainObj.ConnectionString);
                 DataTable rec = new DataTable();
@@ -276,10 +276,11 @@ namespace netbu.Controllers
             string sql = "select * from v_Tariffs_ext_import where nn = " + nn + " /*[Tariffs_ext_import]*/";
             if (nn == "-1")
                 sql = "select * from v_Tariffs_ext_import_group /*[Tariffs_ext_import]*/";
-            var resSQL = "use uFlights\r\ngo\r\n";
+            
+            var resSQL = "";
             resSQL = resSQL + "truncate table Tariffs_ext_import;\r\n";
             resSQL = resSQL + "\r\n----------------------------------------------------\r\n";
-            resSQL = resSQL + InsertCreate(sql, "Tariffs_ext_import"); 
+            resSQL = resSQL + InsertCreate(sql, "Tariffs_ext_import");
 
             resSQL = resSQL + "\r\n----------------------------------------------------\r\n";
             resSQL = resSQL + "\r\ndeclare @date datetime, @al uniqueidentifier, @n int, @AP_IATA varchar(3);\r\n";
@@ -345,10 +346,30 @@ namespace netbu.Controllers
             }
 
 
-
-            string ctype = "application/octet-stream";
-            byte[] buf = Encoding.UTF8.GetBytes(resSQL);
-            return File(buf, ctype, filename);
+            if (mode == "run")
+            {
+                SqlConnection cn = new SqlConnection(MainObj.MSSQLConnection);
+                SqlCommand cmd = new SqlCommand(resSQL, cn);
+                string message = "Тарифы перенесены в uSmart";
+                try
+                {
+                    cn.Open();
+                    cmd.ExecuteNonQuery();
+                    cn.Close();
+                }
+                catch (Exception ex)
+                {
+                    message = "Ошибка:" + ex.Message;
+                }
+                return Content(message);
+            }
+            else
+            {
+                resSQL = "use uFlights\r\ngo\r\n" + resSQL;
+                string ctype = "application/octet-stream";
+                byte[] buf = Encoding.UTF8.GetBytes(resSQL);
+                return File(buf, ctype, filename);
+            }
         }
     }
 }

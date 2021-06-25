@@ -15,6 +15,8 @@ namespace WpfBu.Models
         public static DBUtil Dbutil { get; set; }
         public static bool IsPostgres { get; set; }
 
+        public static string  MSSQLConnection {get; set;}
+
     }
 
     public class DBUtil
