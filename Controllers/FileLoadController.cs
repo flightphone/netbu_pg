@@ -246,11 +246,16 @@ namespace netbu.Controllers
                 DataTable rec = new DataTable();
                 da1.Fill(rec);
 
+                //Считаем
+                Trgm tr = new Trgm();
+                tr.culc(rec, "sv_nn", "sv_caption", "tf_mtow_range", "");
+
+
                 string res = "\r\n";
                 var insStr = "insert into " + TableName + "(";
                 insStr = insStr + rec.Columns[0].ColumnName;
-
-                for (var i = 1; i < rec.Columns.Count; i++)
+                int nc = 17; //rec.Columns.Count;
+                for (var i = 1; i < nc; i++)
                 {
                     insStr = insStr + ',' + rec.Columns[i].ColumnName;
                 }
@@ -258,9 +263,11 @@ namespace netbu.Controllers
 
                 for (int i = 0; i < rec.Rows.Count; i++)
                 {
+                    if ((int)rec.Rows[i]["sv_nn"] == 0)
+                        continue;
                     string valStr = "values (";
                     valStr = valStr + fieldValue(rec.Rows[i][rec.Columns[0].ColumnName].ToString(), rec.Columns[0].ColumnName, numobj);
-                    for (var j = 1; j < rec.Columns.Count; j++)
+                    for (var j = 1; j < nc; j++)
                     {
                         valStr = valStr + ',' + fieldValue(rec.Rows[i][rec.Columns[j].ColumnName].ToString(), rec.Columns[j].ColumnName, numobj);
                     }
@@ -273,10 +280,12 @@ namespace netbu.Controllers
 
             if (string.IsNullOrEmpty(nn))
                 nn = "-1";
-            string sql = "select * from v_Tariffs_ext_import where nn = " + nn + " /*[Tariffs_ext_import]*/";
+            string sql = "select * from v_Tariffs_ext_import4 where nn = " + nn + " /*[Tariffs_ext_import]*/";
+            /*
             if (nn == "-1")
-                sql = "select * from v_Tariffs_ext_import_group /*[Tariffs_ext_import]*/";
-            
+                sql = "select * from v_Tariffs_ext_import_group";
+            */
+
             var resSQL = "";
             resSQL = resSQL + "truncate table Tariffs_ext_import;\r\n";
             resSQL = resSQL + "\r\n----------------------------------------------------\r\n";

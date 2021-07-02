@@ -336,6 +336,12 @@ namespace WpfBu.Models
                 decSQL = decSQL + " order by " + OrdField;
             sql = decSQL;
             var data = MainObj.Dbutil.Runsql(sql, SQLParams);
+            if (IdDeclare == "145")
+            {
+                //Вычисления
+                Trgm tr = new Trgm();
+                tr.culc(data);
+            }
             return data;
         }
 
@@ -454,7 +460,12 @@ namespace WpfBu.Models
             else
                 data = MainObj.Dbutil.Runsql(PrepareSQL, SQLParams);
 
-
+            if (IdDeclare == "145")
+            {
+                //Вычисления
+                Trgm tr = new Trgm();
+                tr.culc(data);
+            }
             MainTab = MainObj.Dbutil.DataToJson(data);
             ColumnTab = MainObj.Dbutil.DataColumn(data);
         }
