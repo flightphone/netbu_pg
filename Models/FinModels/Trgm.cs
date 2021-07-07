@@ -80,6 +80,20 @@ namespace WpfBu.Models
         }
 
 
+        double comp(HashSet<string> ts1, HashSet<string> ts2, bool strong = true)
+        {
+            int m = 0;
+            foreach (string it in ts1)
+            {
+                if (ts2.Contains(it))
+                    m++;
+            }
+            double res = 2.0 * m / (ts1.Count + ts2.Count);
+            if (!strong)
+                res = 1.0 * m / (ts2.Count);
+            return res;
+        }
+
 
         public void culc(DataTable data, string code = "code", string usmartname = "usmartname",
         string at_utg = "at_utg", string at_nameru = "at_nameru")
@@ -94,8 +108,29 @@ namespace WpfBu.Models
             DataTable actypes = new DataTable();
             da.Fill(actypes);
 
+
+
+
             int n1 = actypes.Rows.Count;
             int n2 = rec.Rows.Count;
+
+            //Посчитаем триграммы один раз, дает выигрыш по скорости в 10 раз
+            List<HashSet<string>> recList = new List<HashSet<string>>();
+            List<HashSet<string>> actypesList = new List<HashSet<string>>();
+
+            for (int j = 0; j < n1; j++)
+            {
+                string s2 = actypes.Rows[j]["at_nameru"].ToString();
+                HashSet<string> tr2 = get_trgm(s2);
+                actypesList.Add(tr2);
+            }
+            for (int j = 0; j < n2; j++)
+            {
+                string s2 = rec.Rows[j]["dcname"].ToString();
+                HashSet<string> tr2 = get_trgm(s2);
+                recList.Add(tr2);
+            }
+
             int n = data.Rows.Count;
             for (int i = 0; i < n; i++)
             {
@@ -105,14 +140,18 @@ namespace WpfBu.Models
                     double dmax = 0;
                     string s1 = data.Rows[i]["mtow"].ToString();
 
-                    //s1 = s1.Replace("В", "B").Replace("Б", "B");
                     if (string.IsNullOrEmpty(s1))
                         s1 = "space";
 
+                    //Посчитаем триграммы один раз, дает выигрыш по скорости в 10 раз
+                    HashSet<string> tr1 = get_trgm(s1);
+
                     for (int j = 0; j < n1; j++)
                     {
-                        string s2 = actypes.Rows[j]["at_nameru"].ToString();
-                        double d = comp(s1, s2, false);
+                        //string s2 = actypes.Rows[j]["at_nameru"].ToString();
+                        //double d = comp(s1, s2, false);
+                        HashSet<string> tr2 = actypesList[j];
+                        double d = comp(tr1, tr2, false);
                         if (d > dmax)
                         {
                             dmax = d;
@@ -125,8 +164,6 @@ namespace WpfBu.Models
                         if (!string.IsNullOrEmpty(at_nameru))
                             data.Rows[i][at_nameru] = actypes.Rows[jmax]["at_nameru"].ToString();
                     }
-
-
                 }
 
                 if ((int)data.Rows[i][code] == 0)
@@ -135,11 +172,14 @@ namespace WpfBu.Models
                     int jmax = 0;
                     double dmax = 0;
                     string s1 = data.Rows[i]["dc_name"].ToString();
+                    HashSet<string> tr1 = get_trgm(s1);
 
                     for (int j = 0; j < n2; j++)
                     {
-                        string s2 = rec.Rows[j]["dcname"].ToString();
-                        double d = comp(s2, s1, true);
+                        //string s2 = rec.Rows[j]["dcname"].ToString();
+                        //double d = comp(s2, s1, true);
+                        HashSet<string> tr2 = recList[j];
+                        double d = comp(tr1, tr2, true);
                         if (d > dmax)
                         {
                             dmax = d;

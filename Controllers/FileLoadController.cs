@@ -176,7 +176,7 @@ namespace netbu.Controllers
                     if (vals[j] != "")
                     {
                         if (numobj.Contains(cols_list[j]))
-                            vl = vals[j].Replace("'", "''").Replace(',', '.');
+                            vl = vals[j].Replace("'", "''").Replace(',', '.').Replace(" ", "");
                         else
                         {
                             vl = vals[j].Replace("'", "''");
