@@ -98,7 +98,8 @@ namespace WpfBu.Models
         public void culc(DataTable data, string code = "code", string usmartname = "usmartname",
         string at_utg = "at_utg", string at_nameru = "at_nameru")
         {
-            string sql = "select * from neyro";
+            string suf = data.Rows[0]["neyro"].ToString(); //Подключаем разные словари
+            string sql = "select * from neyro" + suf;
             var da = new NpgsqlDataAdapter(sql, MainObj.ConnectionString);
             DataTable rec = new DataTable();
             da.Fill(rec);
