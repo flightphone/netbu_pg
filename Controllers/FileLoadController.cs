@@ -50,7 +50,7 @@ namespace netbu.Controllers
                         //открыты кавычки
                         if (a == q)
                         {
-                            if (csv1.Substring(i + 1, 1) == q)
+                            if ((i < n2-1) && csv1.Substring(i + 1, 1) == q)
                             {
                                 //двойная кавычка, ничего не происходит
                                 i++;
