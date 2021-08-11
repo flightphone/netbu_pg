@@ -164,7 +164,7 @@ namespace netbu.Controllers
             var F = new Finder();
             F.Account = User.Identity.Name;
             if (string.IsNullOrEmpty(F.Account))
-                F.Account = "malkin";
+                F.Account = "Admin";
 
             F.Mode = "csv";
             if (!string.IsNullOrEmpty(Fc))

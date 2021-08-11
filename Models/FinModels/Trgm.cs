@@ -204,6 +204,22 @@ namespace WpfBu.Models
                     }
                 }
             }
+
+            //сохраняем code
+            if (code == "code")
+            {
+                string sqlu = "";
+                for (int i = 0; i < data.Rows.Count; i++)
+                {
+                    sqlu = sqlu+ $"update tariffs_import set save_code = {data.Rows[i]["code"].ToString()} where id = {data.Rows[i]["id"].ToString()};";
+                }
+                NpgsqlConnection nconn = new NpgsqlConnection(MainObj.ConnectionString);
+                NpgsqlCommand nc = new NpgsqlCommand(sqlu, nconn);
+                nconn.Open();
+                nc.ExecuteNonQuery();
+                nconn.Close();
+
+            }
         }
 
 
