@@ -105,11 +105,11 @@ create table neyro3
  close c
  deallocate c
  */
- /*
+ 
  alter table dbo.neyro
  add trg_len int
  go
- 
+ /*
  update neyro
  set neyro.trg_len = a.n
  from neyro inner join
