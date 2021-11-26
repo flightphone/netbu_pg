@@ -309,7 +309,7 @@ namespace netbu.Controllers
                 if (mi["tf_comment"] == DBNull.Value)
                     mi["tf_comment"] = "";
                 resSQL = resSQL + "\r\n-----" + mi["al_nameru"].ToString() + "\r\n";
-                resSQL = resSQL + "set @date = '" + ((DateTime)mi["tf_datebeg"]).ToString("yyyy-MM-dd") + "';\r\n";
+                resSQL = resSQL + "set @date = '" + ((DateTime)mi["tf_datebeg"]).ToString("yyyy-MM-dd HH:mm") + "';\r\n";
                 resSQL = resSQL + "set @n = " + mi["nn"].ToString() + ";\r\n";
                 resSQL = resSQL + "set @al = '" + mi["tf_al"].ToString() + "';\r\n";
                 if (mi["ap_iata"].ToString() == "DME")
