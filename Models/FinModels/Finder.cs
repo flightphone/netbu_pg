@@ -486,9 +486,9 @@ namespace WpfBu.Models
             var ords = Fcols.Where(f => f.SortOrder > 0 && f.Sort != "Нет").OrderBy(f => f.SortOrder).Select(f =>
             {
                 string s = "";
-                if (f.Sort == "По возрастанию")
+                if (f.Sort == "ASC")
                     s = " " + f.FieldName;
-                if (f.Sort == "По убыванию")
+                if (f.Sort == "DESC")
                     s = " " + f.FieldName + " desc";
                 return s;
             });

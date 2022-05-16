@@ -69,12 +69,17 @@ namespace netbu
                     });
                });
             
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            //Аутентификация
+            app.UseAuthentication();
+
+            app.UseCors(builder => 
+                //builder.SetIsOriginAllowed(s => (s == "http://localhost:8080" )).AllowCredentials().AllowAnyHeader().AllowAnyMethod()
+                builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()
+            );
             //app.UseDefaultFiles ();
             app.UseStaticFiles();
 
-            //Аутентификация
-            app.UseAuthentication();
+            
 
 
             app.UseMvc(routes =>

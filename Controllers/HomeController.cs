@@ -157,6 +157,13 @@ namespace netbu.Controllers
             return View(dc);
         }
 
+
+        public async Task<ActionResult> hidelogin()
+        {
+            await Authenticate("Admin");
+            return Content("ok");
+        }
+
         [HttpPost]
         public async Task<ActionResult> Login(DBClient model, string returnUrl)
         {
