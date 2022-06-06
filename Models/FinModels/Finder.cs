@@ -477,9 +477,9 @@ namespace WpfBu.Models
             {
                 string s = "";
                 if (f.FindString[0] == '!')
-                    s = " (not " + f.FieldName + " like '%" + f.FindString.Substring(1) + "%') ";
+                    s = " (not " + f.FieldName + " like '%" + f.FindString.Substring(1).Replace("'", "''") + "%') ";
                 else
-                    s = " (" + f.FieldName + " like '%" + f.FindString + "%') ";
+                    s = " (" + f.FieldName + " like '%" + f.FindString.Replace("'", "''") + "%') ";
                 return s;
             });
 
