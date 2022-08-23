@@ -21,14 +21,15 @@ namespace netbu.Controllers
         [Authorize]
         public ActionResult Index(string id)
         {
-            ViewBag.id = id;
-            ViewBag.account = User.Identity.Name;
-            return View();
+            //ViewBag.id = id;
+            //ViewBag.account = User.Identity.Name;
+            //return View();
+			return Redirect("~/index.html#" + id);
         }
 
         #region secret
         [Route("ustore/gettree")]
-        [Authorize]
+        //[Authorize]
         public JsonResult gettree()
         {
             try
