@@ -24,7 +24,9 @@ namespace netbu.Controllers
             //ViewBag.id = id;
             //ViewBag.account = User.Identity.Name;
             //return View();
-			return Redirect("~/index.html#" + id);
+            if (string.IsNullOrEmpty(id))
+                id = "81";
+            return Redirect("~/index.html#" + id);
         }
 
         #region secret
@@ -34,14 +36,14 @@ namespace netbu.Controllers
         {
             try
             {
-                
+
                 string account = User.Identity.Name;
                 if (string.IsNullOrEmpty(account))
                     account = "Admin";
                 var tu = new treeutil();
 
                 var data = new DataTable();
-                var cnstr = Program.isPostgres ? Program.AppConfig["cns"] : Program.AppConfig["mscns"]; 
+                var cnstr = Program.isPostgres ? Program.AppConfig["cns"] : Program.AppConfig["mscns"];
                 var sql = "select a.* , fn_getmenuimageid(a.caption) idimage from fn_mainmenu('ALL', @Account) a order by a.ordmenu, idmenu";
                 if (!Program.isPostgres)
                     //sql = "select a.* , dbo.fn_getmenuimageid(a.caption) idimage from fn_mainmenu('ALL', @Account) a order by a.ordmenu, idmenu";
@@ -71,7 +73,7 @@ namespace netbu.Controllers
             }
         }
 
-        
+
 
         [Route("/pg/getid/{table_name}")]
         public JsonResult getid(string table_name)
@@ -209,9 +211,9 @@ namespace netbu.Controllers
 
         }
 
-        
 
-        
+
+
 
     }
 

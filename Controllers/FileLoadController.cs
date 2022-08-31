@@ -141,6 +141,10 @@ namespace netbu.Controllers
                 return Content("Таблица с указанными полями не найдена.");
             }
             string table_name = tabnametab.Rows[0][0].ToString();
+            if (string.IsNullOrEmpty(table_name))
+            {
+                return Content("Таблица с указанными полями не найдена.");
+            }
 
             List<string> numobj = new List<string>();
             sql = "select column_name from information_schema.columns where table_name= @table_name and data_type  in ('integer', 'numeric', 'real')";
