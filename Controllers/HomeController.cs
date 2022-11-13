@@ -21,12 +21,14 @@ namespace netbu.Controllers
         [Authorize]
         public ActionResult Index(string id)
         {
-            //ViewBag.id = id;
-            //ViewBag.account = User.Identity.Name;
-            //return View();
-            if (string.IsNullOrEmpty(id))
+            ViewBag.id = id;
+            ViewBag.account = User.Identity.Name;
+            return View();
+            /*
+			if (string.IsNullOrEmpty(id))
                 id = "81";
             return Redirect("~/index.html#" + id);
+			*/
         }
 
         #region secret
