@@ -7,12 +7,96 @@ using System.Text;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace netbu.Controllers
 {
     [Authorize]
     public class ReactController : Controller
     {
+		public JsonResult ClearColumn(string id)
+        {
+            try
+            {
+                ColumnsAdapter C = new ColumnsAdapter();
+                C.Clear(id);
+                return Json(new { Error = "Колонки таблицы удалены" });
+            }
+            catch (Exception e)
+            {
+                return Json(new { Error = $"Ошибка: {e.Message}" });
+            }
+        }
+
+        public JsonResult SaveColumn(string id)
+        {
+            try
+            {
+                ColumnsAdapter C = new ColumnsAdapter();
+                C.Save(id);
+                return Json(new { Error = "Колонки таблицы сохранены." });
+            }
+            catch (Exception e)
+            {
+                return Json(new { Error = $"Ошибка: {e.Message}" });
+            }
+        }
+
+        public JsonResult SaveColumnA(string id, string columns)
+        {
+            try
+            {
+                List<Dictionary<string, object>> data = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(columns);
+                ColumnsAdapter C = new ColumnsAdapter();
+                C.Save(id, data);
+                return Json(new { Error = "Колонки таблицы сохранены." });
+            }
+            catch (Exception e)
+            {
+                return Json(new { Error = $"Ошибка: {e.Message}" });
+            }
+        }
+
+        public JsonResult UpdateColumn(string id)
+        {
+
+            try
+            {
+                ColumnsAdapter C = new ColumnsAdapter();
+                C.Update(id, User.Identity.Name);
+                return Json(new { Error = "Колонки таблиц загружены." });
+            }
+            catch (Exception e)
+            {
+                return Json(new { Error = $"Ошибка: {e.Message}" });
+            }
+
+        }
+
+        public JsonResult GetColumn(string id)
+        {
+
+            try
+            {
+                ColumnsAdapter C = new ColumnsAdapter();
+                C.CreateColumn(id, User.Identity.Name);
+                int ord = 1;
+                var res = C.Fcols.Where(f => f.FieldName != "IDTMPNUM").Select(c => new Dictionary<string, object>(){
+                    {"fieldname", c.FieldName},
+                    {"fieldcaption",  c.FieldCaption},
+                    {"width",100},
+                    {"displayformat", c.DisplayFormat},
+                    {"visible",c.Visible},
+                    {"ord", ord++}
+                }).ToList();
+                return Json(res);
+            }
+            catch (Exception e)
+            {
+                return Json(new { Error = $"Ошибка: {e.Message}" });
+            }
+
+        }
         public JsonResult exec(string EditProc, string SQLParams, string KeyF)
         {
             Dictionary<string, object> WorkRow = JsonConvert.DeserializeObject<Dictionary<string, object>>(SQLParams);
