@@ -1,1 +1,1 @@
-"D:\Program Files\PostgreSQL\9.6\bin\pg_restore.exe" --dbname=fly1 --host=localhost --username=postgres --clean --if-exists --format=custom d:\dnload\tarifs.dump
+"C:\Program Files\PostgreSQL\9.6\bin\pg_restore.exe" --dbname=uflights --host=localhost --username=postgres --clean --if-exists --format=custom c:\dnload\n2\tarifs.dump
